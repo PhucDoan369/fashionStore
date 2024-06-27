@@ -61,8 +61,8 @@
     <div class="form-group">
         <label for="shirtType">Chọn loại áo:</label>
         <select class="form-control" id="shirtType">
-            <option value=null selected >----   Mời chọn áo   ----</option>
-            <option value="whiteShirt" >Áo trắng</option>
+            <option value=null selected>----   Mời chọn áo   ----</option>
+            <option value="whiteShirt">Áo trắng</option>
             <option value="blackShirt">Áo đen</option>
         </select>
     </div>
@@ -74,7 +74,7 @@
     </form>
     <div id="shirtCanvas"></div>
     <button class="btn btn-primary" id="saveDesign">Lưu Thiết Kế</button>
-    <br>   <br>   <br>
+    <br><br><br>
 </div>
 <div id="controls">
     <div class="form-group">
@@ -91,7 +91,7 @@
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.11/interact.min.js"></script>
 <script>
     let currentImage = null;
@@ -104,35 +104,36 @@
 
     function restoreEventListeners() {
         document.querySelectorAll('.design-image').forEach(imgElement => {
-            interact(imgElement)
-                .draggable({
-                    listeners: {
-                        move(event) {
-                            const target = event.target;
-                            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                            target.style.transform = `translate(${x}px, ${y}px)`;
-                            target.setAttribute('data-x', x);
-                            target.setAttribute('data-y', y);
-                        }
-                    }
-                })
-                .resizable({
-                    edges: { left: false, right: true, bottom: true, top: false },
-                    listeners: {
-                        move(event) {
-                            const target = event.target;
-                            const { width, height } = event.rect;
-                            target.style.width = `${width}px`;
-                            target.style.height = `${height}px`;
-                        }
-                    }
-                });
-
-            imgElement.addEventListener('mousedown', function() {
-                currentImage = imgElement;
-            });
+            setupInteract(imgElement);
+            imgElement.addEventListener('mousedown', () => currentImage = imgElement);
         });
+    }
+
+    function setupInteract(imgElement) {
+        interact(imgElement)
+            .draggable({
+                listeners: {
+                    move(event) {
+                        const target = event.target;
+                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        target.style.transform = `translate(${x}px, ${y}px)`;
+                        target.setAttribute('data-x', x);
+                        target.setAttribute('data-y', y);
+                    }
+                }
+            })
+            .resizable({
+                edges: { left: false, right: true, bottom: true, top: false },
+                listeners: {
+                    move(event) {
+                        const target = event.target;
+                        const { width, height } = event.rect;
+                        target.style.width = `${width}px`;
+                        target.style.height = `${height}px`;
+                    }
+                }
+            });
     }
 
     document.getElementById('shirtType').addEventListener('change', function() {
@@ -161,35 +162,9 @@
 
             document.getElementById('shirtCanvas').appendChild(imgElement);
             saveState();
+            setupInteract(imgElement);
 
-            interact(imgElement)
-                .draggable({
-                    listeners: {
-                        move(event) {
-                            const target = event.target;
-                            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                            target.style.transform = `translate(${x}px, ${y}px)`;
-                            target.setAttribute('data-x', x);
-                            target.setAttribute('data-y', y);
-                        }
-                    }
-                })
-                .resizable({
-                    edges: { left: false, right: true, bottom: true, top: false },
-                    listeners: {
-                        move(event) {
-                            const target = event.target;
-                            const { width, height } = event.rect;
-                            target.style.width = `${width}px`;
-                            target.style.height = `${height}px`;
-                        }
-                    }
-                });
-
-            imgElement.addEventListener('mousedown', function() {
-                currentImage = imgElement;
-            });
+            imgElement.addEventListener('mousedown', () => currentImage = imgElement);
         };
         reader.readAsDataURL(e.target.files[0]);
     });
@@ -221,20 +196,29 @@
         html2canvas(document.querySelector('#shirtCanvas')).then(canvas => {
             const dataURL = canvas.toDataURL('image/png');
             localStorage.setItem('designImage', dataURL);
-            window.location.href = 'confirm.html';
+
+            if (localStorage.getItem('designImage')) {
+                console.log('Design saved successfully.');
+                window.location.href = 'confirm.html';
+            } else {
+                console.error('Failed to save the design.');
+                alert('Có lỗi xảy ra khi lưu thiết kế. Vui lòng thử lại.');
+            }
+        }).catch(error => {
+            console.error('html2canvas error:', error);
+            alert('Có lỗi xảy ra khi lưu thiết kế. Vui lòng thử lại.');
         });
     });
 
     document.getElementById('undoButton').addEventListener('click', function() {
         if (history.length > 1) {
-            history.pop();  // Bỏ qua trạng thái hiện tại
+            history.pop();
             const lastState = history[history.length - 1];
             document.getElementById('shirtCanvas').innerHTML = lastState;
             restoreEventListeners();
         }
     });
 
-    // Lưu trạng thái ban đầu
     saveState();
 </script>
 </body>

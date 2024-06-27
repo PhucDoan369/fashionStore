@@ -27,11 +27,11 @@
             <input type="text" class="form-control" id="phone" required>
         </div>
         <button type="submit" class="btn btn-success">Gửi Đơn Hàng</button>
+        <p id="waitingText" class="text-center" style="display: none;">Xin chờ...</p>
     </form>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Lấy hình ảnh thiết kế từ localStorage và hiển thị
@@ -43,21 +43,35 @@
         document.getElementById('orderForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
+            // Hiển thị dòng chờ
+            document.getElementById('waitingText').style.display = 'block';
+
             var formData = new FormData();
-            formData.append('file', dataURLtoBlob(designImage), 'design.png');
+            formData.append('photo', dataURLtoBlob(designImage), 'design.png');
             formData.append('name', document.getElementById('name').value);
             formData.append('address', document.getElementById('address').value);
             formData.append('phone', document.getElementById('phone').value);
 
-            axios.post('https://api.telegram.org/7003091232:AAH_e26ZNI81g8t4ZlQ5PKIuRI93p0Mv3hs/sendDocument', formData, {
-                params: {
-                    chat_id: '6549625165'
+            // Gửi yêu cầu POST đến server Telegram
+            var url = 'https://api.telegram.org/bot7003091232:AAH_e26ZNI81g8t4ZlQ5PKIuRI93p0Mv3hs/sendPhoto?chat_id=6549625165';
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    alert('Đơn hàng đã được gửi thành công!');
+                } else if (xhr.readyState === XMLHttpRequest.DONE) {
+                    alert('Đang xác nhận, xin chờ 3 giây để thực hiện!');
                 }
-            }).then(response => {
-                alert('Đơn hàng đã được gửi!');
-            }).catch(error => {
-                alert('Có lỗi xảy ra. Vui lòng thử lại.');
-            });
+                // Ẩn dòng chờ khi xử lý kết thúc
+                document.getElementById('waitingText').style.display = 'none';
+
+                // Đợi 4 giây và sau đó chuyển về trang chủ
+                setTimeout(function() {
+                    localStorage.removeItem('designImage');
+                    window.location.href = 'index.html'; // Điều chỉnh đường dẫn này cho phù hợp với trang chủ của bạn
+                }, 4000);
+            };
+            xhr.send(formData);
         });
 
         function dataURLtoBlob(dataurl) {

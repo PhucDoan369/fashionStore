@@ -10,7 +10,6 @@
 <div class="container">
     <h1 class="text-center my-4">Xác Nhận Đơn Hàng</h1>
     <div id="designPreview" class="text-center">
-        <!-- Hình ảnh thiết kế sẽ được chèn ở đây -->
         <img id="designImage" src="" alt="Thiết Kế Của Bạn" class="img-fluid">
     </div>
     <form id="orderForm" class="mt-4">
@@ -31,10 +30,12 @@
     </form>
 </div>
 
+<br><br>
+
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Lấy hình ảnh thiết kế từ localStorage và hiển thị
         var designImage = localStorage.getItem('designImage');
         if (designImage) {
             document.getElementById('designImage').src = designImage;
@@ -43,44 +44,50 @@
         document.getElementById('orderForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
-            // Hiển thị dòng chờ
             document.getElementById('waitingText').style.display = 'block';
 
-            var formData = new FormData();
-            formData.append('photo', dataURLtoBlob(designImage), 'design.png');
-            formData.append('name', document.getElementById('name').value);
-            formData.append('address', document.getElementById('address').value);
-            formData.append('phone', document.getElementById('phone').value);
+            const name = document.getElementById('name').value;
+            const address = document.getElementById('address').value;
+            const phone = document.getElementById('phone').value;
 
-            // Gửi yêu cầu POST đến server Telegram
-            var url = 'https://api.telegram.org/bot7003091232:AAH_e26ZNI81g8t4ZlQ5PKIuRI93p0Mv3hs/sendPhoto?chat_id=6549625165';
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                    alert('Đơn hàng đã được gửi thành công!');
-                } else if (xhr.readyState === XMLHttpRequest.DONE) {
-                    alert('Đang xác nhận, xin chờ 3 giây để thực hiện!');
-                }
-                // Ẩn dòng chờ khi xử lý kết thúc
+            html2canvas(document.querySelector('#designPreview'), { scale: 2 }).then(canvas => {
+                canvas.toBlob(function(blob) {
+                    var formData = new FormData();
+                    formData.append('photo', blob, 'design.png');
+                    formData.append('caption', `Tên: ${name}\nĐịa chỉ: ${address}\nSố điện thoại: ${phone}`);
+
+                    var url = 'https://api.telegram.org/bot7003091232:AAH_e26ZNI81g8t4ZlQ5PKIuRI93p0Mv3hs/sendPhoto?chat_id=6549625165';
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', url, true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                            alert('Đơn hàng đã được gửi thành công! Chúng tôi sẽ liên hệ với bạn nếu cần thêm thông tin. Xin Cảm ơn !');
+                        } else if (xhr.readyState === XMLHttpRequest.DONE) {
+                            alert('Đang xác nhận, xin chờ 3 giây để thực hiện. Xin Cảm ơn !');
+                        }
+                        document.getElementById('waitingText').style.display = 'none';
+
+                        setTimeout(function() {
+                            localStorage.removeItem('designImage');
+                            window.location.href = 'index.html';
+                        }, 4000);
+                    };
+                    xhr.send(formData);
+                });
+            }).catch(error => {
+                console.error('html2canvas error:', error);
+                alert('Có lỗi xảy ra khi lưu thiết kế. Vui lòng thử lại.');
                 document.getElementById('waitingText').style.display = 'none';
-
-                // Đợi 4 giây và sau đó chuyển về trang chủ
-                setTimeout(function() {
-                    localStorage.removeItem('designImage');
-                    window.location.href = 'index.html'; // Điều chỉnh đường dẫn này cho phù hợp với trang chủ của bạn
-                }, 4000);
-            };
-            xhr.send(formData);
+            });
         });
 
         function dataURLtoBlob(dataurl) {
             var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
                 bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-            while(n--){
+            while (n--) {
                 u8arr[n] = bstr.charCodeAt(n);
             }
-            return new Blob([u8arr], {type:mime});
+            return new Blob([u8arr], { type: mime });
         }
     });
 </script>

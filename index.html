@@ -10,7 +10,7 @@
             background-color: #f8f9fa;
         }
         #shirtCanvas {
-            border: 2px solid #ccc;
+            border: 2px solid #1a8ff5;
             width: 150%; /* Thay đổi chiều rộng */
             max-width: 1000px; /* Giới hạn chiều rộng tối đa */
             margin: 20px auto;
@@ -18,7 +18,7 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            height: 600px; /* Thay đổi chiều cao */
+            height: 630px; /* Thay đổi chiều cao */
             background-color: white;
         }
         .design-image {
@@ -69,7 +69,7 @@
             border: 2px solid #1a8ff5;
             border-radius: 5px;
             position: fixed;
-            top: 300px;
+            top: 170px;
             left: 1360px;
             z-index: 10;
             max-width: 320px;
@@ -88,6 +88,11 @@
         .control-group input[type="range"] {
             width: 150px;
         }
+        .chobtn{
+            position: fixed;
+            top: 65%;
+            left: 60px;
+        }
     </style>
 </head>
 <body>
@@ -101,6 +106,7 @@
                     <option value=null selected>---- Chọn áo ----</option>
                     <option value="whiteShirt">Áo trắng</option>
                     <option value="blackShirt">Áo đen</option>
+                    <option value="aolotay">Áo lỡ tay trắng</option>
                 </select>
             </div>
             <form id="uploadForm">
@@ -110,7 +116,7 @@
                 </div>
             </form>
             <div id="shirtCanvas"></div>
-            <button class="btn btn-primary" id="saveDesign">Lưu Thiết Kế</button>
+            <button class="btn btn-primary chobtn" id="saveDesign">Lưu Thiết Kế</button>
         </div>
     </div>
 </div>
@@ -128,13 +134,17 @@
 </div>
 
 <div id="iconGallery">
-    <label style="grid-column: span 3; text-align: center;">--- Icon Mẫu ---</label>
-    <img src="images/PVandVietQR.png" class="icon-sample" draggable="true">
-    <img src="images/PVandVietQR.png" class="icon-sample" draggable="true">
-    <img src="images/PVandVietQR.png" class="icon-sample" draggable="true">
-    <img src="images/PVandVietQR.png" class="icon-sample" draggable="true">
-    <img src="images/PVandVietQR.png" class="icon-sample" draggable="true">
-    <img src="images/PVandVietQR.png" class="icon-sample" draggable="true">
+    <h5 style="grid-column: span 3; text-align: center;"> Icon Mẫu </h5>
+    <img src="images/icon1.png" class="icon-sample" draggable="true">
+    <img src="images/icon2.png" class="icon-sample" draggable="true">
+    <img src="images/icon3.jpg" class="icon-sample" draggable="true">
+    <img src="images/icon4.jpg" class="icon-sample" draggable="true">
+    <img src="images/icon5.png" class="icon-sample" draggable="true">
+    <img src="images/icon6.png" class="icon-sample" draggable="true">
+    <img src="images/icon7.png" class="icon-sample" draggable="true">
+    <img src="images/icon8.png" class="icon-sample" draggable="true">
+    <img src="images/icon9.png" class="icon-sample" draggable="true">
+    <img src="images/icon10.png" class="icon-sample" draggable="true">
 </div>
 
 <div id="trash"></div>
@@ -187,13 +197,15 @@
     }
 
     document.getElementById('shirtType').addEventListener('change', function() {
-        const shirtCanvas = document.getElementById('shirtCanvas');
-        if (this.value === 'whiteShirt') {
-            shirtCanvas.style.backgroundImage = "url('images/aotrang.jpg')";
-        } else if (this.value === 'blackShirt') {
-            shirtCanvas.style.backgroundImage = "url('images/aoden.jpg')";
-        }
-    });
+    const shirtCanvas = document.getElementById('shirtCanvas');
+    const shirtImages = {
+        whiteShirt: 'images/aotrang.jpg',
+        blackShirt: 'images/aoden.jpg',
+        aolotay: 'images/aotranglotay.jpg'
+    };
+    shirtCanvas.style.backgroundImage = `url('${shirtImages[this.value]}')`;
+});
+
 
     document.getElementById('uploadImage').addEventListener('change', function(e) {
         const reader = new FileReader();

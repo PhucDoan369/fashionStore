@@ -25,9 +25,19 @@
             <label for="phone">Số điện thoại:</label>
             <input type="text" class="form-control" id="phone" required>
         </div>
+        <div class="form-group">
+            <label for="size">Size Áo:</label>
+            <select class="form-control" id="size" required>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+            </select>
+        </div>
         <button type="submit" class="btn btn-success">Gửi Đơn Hàng</button>
         <p id="waitingText" class="text-center" style="display: none;">Xin chờ...</p>
     </form>
+    <br>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -47,12 +57,13 @@
             const name = document.getElementById('name').value;
             const address = document.getElementById('address').value;
             const phone = document.getElementById('phone').value;
+            const size = document.getElementById('size').value;
 
             html2canvas(document.querySelector('#designPreview'), { scale: 2 }).then(canvas => {
                 canvas.toBlob(function(blob) {
                     var formData = new FormData();
                     formData.append('photo', blob, 'design.png');
-                    formData.append('caption', `Tên: ${name}\nĐịa chỉ: ${address}\nSố điện thoại: ${phone}`);
+                    formData.append('caption', `Tên: ${name}\nĐịa chỉ: ${address}\nSố điện thoại: ${phone}\nSize áo: ${size}`);
 
                     // Gửi đến chat_id thứ nhất
                     sendToTelegram(formData, '6549625165');
@@ -78,10 +89,12 @@
             var xhr = new XMLHttpRequest();
             xhr.open('POST', url, true);
             xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                    console.log(`Message sent to chat_id: ${chatId}`);
-                } else if (xhr.readyState === XMLHttpRequest.DONE) {
-                    console.error(`Failed to send message to chat_id: ${chatId}`);
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        console.log(`Message sent to chat_id: ${chatId}`);
+                    } else {
+                        console.error(`Failed to send message to chat_id: ${chatId}`);
+                    }
                 }
             };
             xhr.send(formData);

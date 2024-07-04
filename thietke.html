@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiết Kế Áo Phông của Cò</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+           body {
+             background-color: #f8f9fa;
+        }
+        #shirtCanvas {
+            border: 2px solid #1a8ff5;
+            width: 150%; /* Thay đổi chiều rộng */
+            max-width: 1000px; /* Giới hạn chiều rộng tối đa */
+            margin: 20px auto;
+            position: relative;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 630px; /* Thay đổi chiều cao */
+            background-color: white;
+        }
+        .design-image {
+            position: absolute;
+            cursor: move;
+            max-width: 100%;
+            height: auto;
+        }
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border: 1px solid black;
+            cursor: nwse-resize;
+            right: 0;
+            bottom: 0;
+        }
+        #controls {
+            position: fixed;
+            top: 50%;
+            left: 50px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #1a8ff5;
+            border-radius: 5px;
+        }
+        #trash {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: url('trash_icon.png') no-repeat center center;
+            background-size: cover;
+            cursor: pointer;
+        }
+        #iconGallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Tự động điều chỉnh số lượng cột */
+            gap: 10px; /* Giảm khoảng cách giữa các icon */
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #1a8ff5;
+            border-radius: 5px;
+            position: fixed;
+            top: 170px;
+            right: 10px;
+            z-index: 10;
+            max-width: 320px;
+        }
+        .icon-sample {
+            width: 110%; /* Để các icon tự điều chỉnh kích thước theo lưới */
+            height: auto;
+            cursor: grab;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        .control-group label {
+            margin-right: 5px;
+        }
+        .control-group input[type="range"] {
+            width: 150px;
+        }
+        .chobtn {
+            position: fixed;
+            top: 65%;
+            left: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">Thiết Kế Áo Phông của Cò</h1>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="shirtType">Chọn loại áo:</label>
+                    <select class="form-control" id="shirtType">
+                        <option value=null selected>---- Chọn áo ----</option>
+                        <option value="whiteShirt">Áo trắng</option>
+                        <option value="blackShirt">Áo đen</option>
+                        <option value="aolotay">Áo lỡ tay trắng</option>
+                    </select>
+                </div>
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="uploadImage">Tải ảnh in vào áo của bạn lên:</label>
+                        <input type="file" class="form-control-file" id="uploadImage" accept="image/*">
+                    </div>
+                </form>
+                <div id="shirtCanvas"></div>
+                <button class="btn btn-primary chobtn" id="saveDesign">Lưu Thiết Kế</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls">
+        <div class="control-group">
+            <label for="opacityRange">Độ trong suốt:</label>
+            <input type="range" class="form-control-range" id="opacityRange" min="0" max="100" value="100">
+        </div>
+        <div class="control-group">
+            <label for="sizeRange">Kích thước:</label>
+            <input type="range" class="form-control-range" id="sizeRange" min="10" max="300" value="100">
+        </div>
+        <button class="btn btn-warning" id="undoButton">Quay lại bước trước</button>
+    </div>
+
+    <div id="iconGallery">
+        <h5 style="grid-column: span 3; text-align: center;"> Icon Mẫu </h5>
+        <img src="images/icon1.png" class="icon-sample" draggable="true">
+        <img src="images/icon2.png" class="icon-sample" draggable="true">
+        <img src="images/icon3.jpg" class="icon-sample" draggable="true">
+        <img src="images/icon4.jpg" class="icon-sample" draggable="true">
+        <img src="images/icon5.png" class="icon-sample" draggable="true">
+        <img src="images/icon6.png" class="icon-sample" draggable="true">
+        <img src="images/icon7.png" class="icon-sample" draggable="true">
+        <img src="images/icon8.png" class="icon-sample" draggable="true">
+        <img src="images/icon9.png" class="icon-sample" draggable="true">
+        <img src="images/icon10.png" class="icon-sample" draggable="true">
+    </div>
+
+    <div id="trash"></div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.11/interact.min.js"></script>
+    <script>
+        // Tự động đặt mức thu phóng khi tải trang
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.zoom = 0.9;
+        });
+
+        let currentImage = null;
+        const history = [];
+
+        function saveState() {
+            const shirtCanvas = document.getElementById('shirtCanvas');
+            history.push(shirtCanvas.innerHTML);
+        }
+
+        function restoreEventListeners() {
+            document.querySelectorAll('.design-image').forEach(imgElement => {
+                setupInteract(imgElement);
+                imgElement.addEventListener('mousedown', () => currentImage = imgElement);
+            });
+        }
+
+        function setupInteract(imgElement) {
+            interact(imgElement)
+                .draggable({
+                    listeners: {
+                        move(event) {
+                            const target = event.target;
+                            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                            target.style.transform = `translate(${x}px, ${y}px)`;
+                            target.setAttribute('data-x', x);
+                            target.setAttribute('data-y', y);
+                        }
+                    }
+                })
+                .resizable({
+                    edges: { left: false, right: true, bottom: true, top: false },
+                    listeners: {
+                        move(event) {
+                            const target = event.target;
+                            const { width, height } = event.rect;
+                            target.style.width = `${width}px`;
+                            target.style.height = `${height}px`;
+                        }
+                    }
+                });
+        }
+
+        document.getElementById('shirtType').addEventListener('change', function() {
+            const shirtCanvas = document.getElementById('shirtCanvas');
+            const shirtImages = {
+                whiteShirt: 'images/aotrang.jpg',
+                blackShirt: 'images/aoden.jpg',
+                aolotay: 'images/aotranglotay.jpg'
+            };
+            shirtCanvas.style.backgroundImage = `url('${shirtImages[this.value]}')`;
+        });
+
+        document.getElementById('uploadImage').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imgElement = document.createElement('img');
+                imgElement.src = event.target.result;
+                imgElement.className = 'design-image';
+                imgElement.style.left = '0px';
+                imgElement.style.top = '0px';
+                imgElement.style.width = '100px';
+                imgElement.style.opacity = '1';
+
+                const resizeHandle = document.createElement('div');
+                resizeHandle.className = 'resize-handle';
+                imgElement.appendChild(resizeHandle);
+
+                document.getElementById('shirtCanvas').appendChild(imgElement);
+                saveState();
+                setupInteract(imgElement);
+
+                imgElement.addEventListener('mousedown', () => currentImage = imgElement);
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        document.getElementById('opacityRange').addEventListener('input', function() {
+            if (currentImage) {
+                currentImage.style.opacity = this.value / 100;
+                saveState();
+            }
+        });
+
+        document.getElementById('sizeRange').addEventListener('input', function() {
+            if (currentImage) {
+                currentImage.style.width = this.value + 'px';
+                currentImage.style.height = 'auto';
+                saveState();
+            }
+        });
+
+        document.getElementById('trash').addEventListener('click', function() {
+            if (currentImage) {
+                currentImage.remove();
+                currentImage = null;
+                saveState();
+            }
+        });
+
+        document.getElementById('saveDesign').addEventListener('click', function() {
+            html2canvas(document.querySelector('#shirtCanvas')).then(canvas => {
+                const dataURL = canvas.toDataURL('image/png');
+                localStorage.setItem('designImage', dataURL);
+
+                if (localStorage.getItem('designImage')) {
+                    console.log('Design saved successfully.');
+                    window.location.href = 'confirm.html';
+                } else {
+                    console.error('Failed to save the design.');
+                    alert('Có lỗi xảy ra khi lưu thiết kế. Vui lòng thử lại.');
+                }
+            }).catch(error => {
+                console.error('html2canvas error:', error);
+                alert('Có lỗi xảy ra khi lưu thiết kế. Vui lòng thử lại.');
+            });
+        });
+
+        document.getElementById('undoButton').addEventListener('click', function() {
+            if (history.length > 0) {
+                const shirtCanvas = document.getElementById('shirtCanvas');
+                shirtCanvas.innerHTML = history.pop();
+                restoreEventListeners();
+            }
+        });
+
+        document.querySelectorAll('.icon-sample').forEach(icon => {
+            icon.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', e.target.src);
+            });
+        });
+
+        document.getElementById('shirtCanvas').addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+
+        document.getElementById('shirtCanvas').addEventListener('drop', function(e) {
+            e.preventDefault();
+            const imageUrl = e.dataTransfer.getData('text/plain');
+            const imgElement = document.createElement('img');
+            imgElement.src = imageUrl;
+            imgElement.className = 'design-image';
+            imgElement.style.left = `${e.offsetX}px`;
+            imgElement.style.top = `${e.offsetY}px`;
+            imgElement.style.width = '100px';
+            imgElement.style.opacity = '1';
+
+            const resizeHandle = document.createElement('div');
+            resizeHandle.className = 'resize-handle';
+            imgElement.appendChild(resizeHandle);
+
+            e.target.appendChild(imgElement);
+            saveState();
+            setupInteract(imgElement);
+
+            imgElement.addEventListener('mousedown', () => currentImage = imgElement);
+        });
+    </script>
+    <br><br>
+</body>
+</html>
